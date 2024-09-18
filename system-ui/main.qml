@@ -9,6 +9,7 @@ Window {
     width: 1280
     height: 720
     color: "whitesmoke"
+    property string focusAppId: ""
 
     Text {
         anchors.bottom: parent.bottom
@@ -28,7 +29,7 @@ Window {
 
             Image {
                 source: icon
-                opacity: isRunning ? 0.3 : 1.0
+                opacity: focusAppId == application.id ? 0.3 : 1.0
 
                 Rectangle {
                     x: 96; y: 38
@@ -45,7 +46,12 @@ Window {
                     id: imouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: isRunning ? application.stop() : application.start();
+                    onClicked: {
+                        if (!isRunning){
+                            application.start();
+                        }
+                        focusAppId = application.id
+                    }
                 }
             }
         }
@@ -66,7 +72,7 @@ Window {
             border.width: 3
             border.color: "grey"
             z: model.index
-
+            visible: model.appId == focusAppId
 
             WindowItem {
                 anchors.fill: parent
@@ -111,8 +117,12 @@ Window {
     Connections {
         target: WindowManager
         function onWindowAdded(window) {
+            var appId = window.application.id
             var model = window.windowProperty("type") === "pop-up" ? popupsModel : topLevelWindowsModel;
-            model.append({"window":window});
+            model.append({
+                "window":window,
+                "appId":appId
+                });
         }
     }
 
